@@ -34,7 +34,7 @@ module GraphQL::Batch
     def load(key)
       cache[cache_key(key)] ||= begin
         queue << key
-        ::Promise.new.tap { |promise| promise.source = self }
+        ::Promise.new { wait }
       end
     end
 
