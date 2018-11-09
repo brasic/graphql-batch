@@ -44,10 +44,20 @@ module GraphQL::Batch
 
     attr_accessor :loader_key, :executor
 
+    def initialize
+      @scheduled = false
+    end
+
     def load(key)
       cache[cache_key(key)] ||= begin
         queue << key
-        ::Promise.new.tap { |promise| promise.source = self }
+
+        unless @scheduled
+          ::Promise::QUEUE.enqueue_macrotask(self)
+          @scheduled = true
+        end
+
+        ::Promise.new
       end
     end
 
@@ -66,7 +76,9 @@ module GraphQL::Batch
     end
 
     # For Promise#sync
-    def wait #:nodoc:
+    def call #:nodoc:
+      @scheduled = false
+
       if executor
         executor.resolve(self)
       else
