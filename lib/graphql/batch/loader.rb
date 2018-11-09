@@ -53,7 +53,7 @@ module GraphQL::Batch
         queue << key
 
         unless @scheduled
-          ::Promise::QUEUE.enqueue_macrotask(self)
+          ::Promise::QUEUE.enqueue_macrotask(self, :wait)
           @scheduled = true
         end
 
@@ -76,7 +76,7 @@ module GraphQL::Batch
     end
 
     # For Promise#sync
-    def call #:nodoc:
+    def wait #:nodoc:
       @scheduled = false
 
       if executor
