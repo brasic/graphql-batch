@@ -44,10 +44,6 @@ module GraphQL::Batch
 
     attr_accessor :loader_key, :executor
 
-    def initialize
-      @scheduled = false
-    end
-
     def load(key)
       cache[cache_key(key)] ||= begin
         queue << key
